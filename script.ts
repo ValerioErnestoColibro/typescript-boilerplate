@@ -11,10 +11,10 @@ class Marketplace {
   users: ReadonlyArray<User> = [];
   ads: ReadonlyArray<Ad> = [];
   reviews: ReadonlyArray<Review> = [];
-  device: ReadonlyArray<Device> = [];
+  devices: ReadonlyArray<Device> = [];
   auth: ReadonlyArray<Auth> = [];
   reports: ReadonlyArray<ModelReport> = [];
-  favourite: ReadonlyArray<Favourite> = [];
+  favourites: ReadonlyArray<Favourite> = [];
   register(email: string, password: string) {
     const userFind = this.users.find((user) => {
       if (user.email === email) {
@@ -43,7 +43,7 @@ class Marketplace {
       }
     });
 
-    if (!!userFind && this.device.length <= 2) {
+    if (!!userFind && this.devices.length <= 2) {
       const newAuth = new Auth(userFind.primaryKeyUser);
       this.auth = [...this.auth, newAuth];
       return newAuth.token;
@@ -347,7 +347,7 @@ class Marketplace {
     } else console.log("token non valido");
   }
 
-  listFiltred(token: Auth["token"], category: Ad["category"]) {
+  listFiltredByCategory(token: Auth["token"], category: Ad["category"]) {
     //lista filtrata
     const auth = this.getAuthByToken(token);
     if (!!auth) {
@@ -400,7 +400,7 @@ class Marketplace {
       });
       if (!!primaryKeyAdsFind && !!referenceKeyUserFind) {
         const newFavourite = new Favourite(referenceKeyUser, referenceKeyAds);
-        this.favourite = [...this.favourite, newFavourite];
+        this.favourites = [...this.favourites, newFavourite];
         console.log("annuncio aggiunto ai preferiti");
       } else console.log("annuncio non aggiunto");
     } else {
@@ -408,7 +408,7 @@ class Marketplace {
     }
   }
 
-  editFavourite(
+  deleteFavourite(
     token: Auth["token"],
     referenceKeyAds: Ad["primaryKeyAds"],
     referenceKeyUser: Auth["referenceKeyUser"]
@@ -427,7 +427,7 @@ class Marketplace {
       });
 
       if (!!primaryKeyAdsFind && !!referenceKeyUserFind) {
-        this.favourite = this.favourite.filter((el) => {
+        this.favourites = this.favourites.filter((el) => {
           if (
             el.referenceKeyUser === referenceKeyUser &&
             el.referenceKeyAds === referenceKeyAds
@@ -499,8 +499,8 @@ const apis = {
   addReview: new DocAPI("/reviews", "POST", true),
   editReview: new DocAPI("/reviews/{primaryKReview}", "PUT", true),
   deleteReview: new DocAPI("/reviews/{primaryKReview}", "DELETE", true),
-  addFavoutite: new DocAPI("/favourite", "POST", true),
-  editFavourite: new DocAPI("/favourite/{primaryKeyFavourite}", "DELETE", true),
+  addFavoutite: new DocAPI("/s", "POST", true),
+  deleteFavourite: new DocAPI("/s/{primaryKeyFavourite}", "DELETE", true),
   getListPurchasedToBeConfirmedByUserPurchased: new DocAPI(
     "ads/{primaryKeyAds}/purchased",
     "GET",
@@ -508,5 +508,5 @@ const apis = {
   ),
   markAsSold: new DocAPI("/ads/{primaryKeyAds}", "PATCH", true),
   getAuthByToken: new DocAPI("/auth", "GET", true),
-  listFiltred: new DocAPI("/ads/", "GET", true), //da vedere meglio i query
+  listFiltred: new DocAPI("/ads?category={category}", "GET", true), //da vedere meglio i query
 };
