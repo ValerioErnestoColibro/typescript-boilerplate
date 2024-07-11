@@ -6,6 +6,8 @@ import { User } from "./user";
 const myApp = new Marketplace();
 const app = express();
 app.use(express.json());
+const port = process.env.PORT || 3000; //enviroment
+const baseUrl = process.env.BASE_URL || "http://localhost:";
 
 app.get("/", (req: Request, res: Response) => {
   return res.status(200).sendFile(__dirname + "/index.html"); // __dirname ottiene il percorso della cartella
@@ -46,6 +48,7 @@ app.post("/api/auth/login", (req: Request, res: Response) => {
 });
 
 app.put("/api/auth/logout", (req: Request, res: Response) => {});
-app.listen(3000, () =>
-  console.log("Il server is running  on http://localhost:3000")
-);
+
+app.listen(port, () => {
+  console.log(`Il server is running  on http://localhost:${baseUrl}${port}`);
+});
