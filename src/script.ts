@@ -1,11 +1,11 @@
-import { User } from "./user";
-import { Ad } from "./ad";
-import { Review } from "./review";
-import { Device } from "./device";
-import { Auth } from "./auth";
-import { ModelReport } from "./modelreport";
-import { Favourite } from "./favourite";
-import { DocAPI } from "./docApi";
+import { User } from "./models/user";
+import { Ad } from "./models/ad";
+import { Review } from "./models/review";
+import { Device } from "./models/device";
+import { Auth } from "./models/auth";
+import { ModelReport } from "./models/modelreport";
+import { Favourite } from "./models/favourite";
+import { DocAPI } from "./models/docApi";
 
 export class Marketplace {
   users: ReadonlyArray<User> = [];
@@ -26,13 +26,11 @@ export class Marketplace {
     });
 
     if (!!userFind) {
-      console.log("email gia esistente");
-      return true;
+      return false;
     } else {
       let newUser = new User(email, password);
       this.users = [...this.users, newUser];
-      console.log("registrazione effettuata con successo");
-      return false;
+      return true;
     }
   }
 
@@ -70,9 +68,9 @@ export class Marketplace {
           return true;
         }
       });
-      console.log("logout effettuato con successo");
+      return true;
     } else {
-      console.log("token non valido");
+      return false;
     }
   }
 
@@ -91,9 +89,9 @@ export class Marketplace {
             return false;
           } else return true;
         });
-        console.log("eliminazione account avvenuta con successo");
-      } else console.log("password non corretta");
-    } else console.log("token non valido");
+        return true;
+      } else return false;
+    } else return false;
   }
 
   updateUsername(

@@ -9,7 +9,7 @@ export class Ad {
   category: string;
   urlForImage: string;
   address: string;
-  referenceKeyUserPurchased: number;
+  referenceKeyUserPurchased: string;
   date: Date;
   primaryKeyAds: number;
   urlImage: string;
@@ -22,7 +22,7 @@ export class Ad {
     category: string,
     urlForImage: string,
     address: string,
-    referenceKeyUserPurchased: number,
+    referenceKeyUserPurchased: string,
     urlImage: string
   ) {
     this.title = title;
