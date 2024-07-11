@@ -1,4 +1,22 @@
-GET 
-// GET url da mettere
-Content-Type: application/json
+### USER LIST
+
+POST http://localhost:3000/api/auth/register
+content-type: application/json
+
+{
+  "email": "opp@gmail.com",
+  "password": "admin"
+}
+
+### USER LOGIN
+
+POST  http://localhost:3000/api/auth/login
+content-type: application/json
+
+{
+  "email":"cas@gmail.com",
+  "password":"admin"
+}
+
+
 

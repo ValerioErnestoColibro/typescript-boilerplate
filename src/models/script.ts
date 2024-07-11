@@ -1,13 +1,13 @@
-import { User } from "../typescript/src/models/user";
-import { Ad } from "./src/models/ad";
-import { Review } from "../typescript/src/models/review";
-import { Device } from "./src/models/device";
-import { Auth } from "./src/models/auth";
-import { ModelReport } from "./src/models/modelreport";
-import { Favourite } from "./src/models/favourite";
+import { User } from "./user";
+import { Ad } from "./ad";
+import { Review } from "./review";
+import { Device } from "./device";
+import { Auth } from "./auth";
+import { ModelReport } from "./modelreport";
+import { Favourite } from "./favourite";
 import { DocAPI } from "./docApi";
 
-class Marketplace {
+export class Marketplace {
   users: ReadonlyArray<User> = [];
   ads: ReadonlyArray<Ad> = [];
   reviews: ReadonlyArray<Review> = [];
@@ -15,8 +15,9 @@ class Marketplace {
   auth: ReadonlyArray<Auth> = [];
   reports: ReadonlyArray<ModelReport> = [];
   favourites: ReadonlyArray<Favourite> = [];
+
   register(email: string, password: string) {
-    const userFind = this.users.find((user) => {
+    const userFind = this.users.find((user: User) => {
       if (user.email === email) {
         return true;
       } else {
@@ -26,16 +27,17 @@ class Marketplace {
 
     if (!!userFind) {
       console.log("email gia esistente");
+      return true;
     } else {
       let newUser = new User(email, password);
       this.users = [...this.users, newUser];
-
       console.log("registrazione effettuata con successo");
+      return false;
     }
   }
 
   login(email: User["email"], password: User["password"]) {
-    const userFind = this.users.find((user) => {
+    const userFind = this.users.find((user: User) => {
       if (user.email === email && user.password === password) {
         return true;
       } else {
@@ -43,7 +45,7 @@ class Marketplace {
       }
     });
 
-    if (!!userFind && this.devices.length <= 2) {
+    if (!!userFind) {
       const newAuth = new Auth(userFind.primaryKeyUser);
       this.auth = [...this.auth, newAuth];
       return newAuth.token;
@@ -237,7 +239,7 @@ class Marketplace {
     } else console.log("token non valido");
   }
 
-  addReview(
+  createReview(
     token: Auth["token"],
     referenceKeyUser: Auth["referenceKeyUser"],
     title: Review["title"],
@@ -347,40 +349,7 @@ class Marketplace {
     } else console.log("token non valido");
   }
 
-  listFiltredByCategory(token: Auth["token"], category: Ad["category"]) {
-    //lista filtrata
-    const auth = this.getAuthByToken(token);
-    if (!!auth) {
-      const categoryFind = this.ads.find((el) => {
-        if (el.category === category) {
-          return true;
-        } else return false;
-      });
-
-      if (!!categoryFind) {
-        return this.ads.filter((el) => {
-          if (el.category === category) {
-            return true;
-          } else return false;
-        });
-      } else console.log("nessun annuncio per questa categoria");
-    } else console.log("token non valido");
-  }
-
-  getAuthByToken(token: Auth["token"]) {
-    const authFind = this.auth.find((el) => {
-      if (el.token === token) return true;
-      else return false;
-    });
-
-    if (!!authFind) {
-      return authFind.referenceKeyUser;
-    } else {
-      return null;
-    }
-  }
-
-  addFavoutite(
+  createFavoutite(
     token: Auth["token"],
     referenceKeyUser: Auth["referenceKeyUser"],
     referenceKeyAds: Ad["primaryKeyAds"]
@@ -439,23 +408,54 @@ class Marketplace {
     } else console.log("token non valido");
   }
 
-  getListPurchasedToBeConfirmedByUserPurchased(token: Auth["token"]) {
+  //   getListPurchasedToBeConfirmedByUserPurchased(token: Auth["token"]) {
+  //     const auth = this.getAuthByToken(token);
+  //     if (!!auth) {
+  //       const primaryKeyAdsFind = this.ads.find((el) => {
+  //         if (el.referenceKeyUserPurchased === null) {
+  //           return true;
+  //         } else return false;
+  //       });
+  //       if (!!primaryKeyAdsFind) {
+  //         return this.ads.filter((el) => {
+  //           if (el.referenceKeyUserPurchased === null) {
+  //             return true;
+  //             console.log("nessun annuncion corrisponde alla tua ricerca");
+  //           } else return false;
+  //         });
+  //       }
+  //     }
+  //   }
+  getAuthByToken(token: Auth["token"]) {
+    const authFind = this.auth.find((el) => {
+      if (el.token === token) return true;
+      else return false;
+    });
+
+    if (!!authFind) {
+      return authFind.referenceKeyUser;
+    } else {
+      return null;
+    }
+  }
+  listFiltredByCategory(token: Auth["token"], category: Ad["category"]) {
+    //lista filtrata
     const auth = this.getAuthByToken(token);
     if (!!auth) {
-      const primaryKeyAdsFind = this.ads.find((el) => {
-        if (el.referenceKeyUserPurchased === null) {
+      const categoryFind = this.ads.find((el) => {
+        if (el.category === category) {
           return true;
         } else return false;
       });
-      if (!!primaryKeyAdsFind) {
+
+      if (!!categoryFind) {
         return this.ads.filter((el) => {
-          if (el.referenceKeyUserPurchased === null) {
+          if (el.category === category) {
             return true;
-            console.log("nessun annuncion corrisponde alla tua ricerca");
           } else return false;
         });
-      }
-    }
+      } else console.log("nessun annuncio per questa categoria");
+    } else console.log("token non valido");
   }
   markAsSold(
     token: Auth["token"],
