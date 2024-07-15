@@ -17,6 +17,20 @@ class Marketplace {
         this.reports = [];
         this.favourites = [];
     }
+    getAuthByToken(token) {
+        const authFind = this.auth.find((el) => {
+            if (el.token === token)
+                return true;
+            else
+                return false;
+        });
+        if (!!authFind) {
+            return authFind.referenceKeyUser;
+        }
+        else {
+            return null;
+        }
+    }
     register(email, password) {
         const userFind = this.users.find((user) => {
             if (user.email === email) {
@@ -126,11 +140,12 @@ class Marketplace {
                     }
                 });
             }
+            return true;
         }
         else
-            console.log("token errato");
+            return false;
     }
-    createAds(token, referenceKeyUser, title, description, price, status, category, urlImage, address, referenceKeyUserPurchased) {
+    createAd(token, referenceKeyUser, title, description, price, status, category, urlImage, address, referenceKeyUserPurchased) {
         const auth = this.getAuthByToken(token);
         if (!!auth) {
             const userFind = this.users.find((el) => {
@@ -141,57 +156,51 @@ class Marketplace {
                     return false;
             });
             if (!!userFind) {
-                const newAds = new ad_1.Ad(title, description, price, status, referenceKeyUser, category, urlImage, address, referenceKeyUserPurchased, urlImage);
-                this.ads = [...this.ads, newAds];
-                console.log("annuncio creato con successo");
+                const newAd = new ad_1.Ad(title, description, price, status, referenceKeyUser, category, urlImage, address, referenceKeyUserPurchased, urlImage);
+                this.ads = [...this.ads, newAd];
             }
             else {
                 console.log("non è stato possibile creare l'annuncio");
             }
+            return true;
         }
         else {
-            console.log("token non esiste");
+            return false;
+            console.log("token errato");
         }
     }
-    editAds(token, newTitle, newDescription, newPrice, newStatus, referenceKeyUser, primaryKeyAds, newCategory, newUrlForImage) {
+    editAds(token, newTitle, newDescription, newPrice, newStatus, primaryKeyAd, newCategory, newUrlImage) {
         // modificare annuncio
         const auth = this.getAuthByToken(token);
         if (!!auth) {
-            const referenceKeyUserFind = this.auth.find((el) => {
-                if (el.referenceKeyUser === referenceKeyUser) {
-                    return true;
-                }
-                else
-                    return false;
-            });
             const primaryKeyAdsFind = this.ads.find((el) => {
-                if (el.primaryKeyAds === primaryKeyAds) {
+                if (el.primaryKeyAd === primaryKeyAd) {
                     return true;
                 }
                 else
                     return false;
             });
-            if (!!primaryKeyAdsFind && !!referenceKeyUserFind) {
+            if (!!primaryKeyAdsFind) {
                 this.ads = this.ads.map((el) => {
-                    if (el.primaryKeyAds === primaryKeyAds &&
-                        el.referenceKeyUser === referenceKeyUser) {
-                        return Object.assign(Object.assign({}, el), { title: newTitle, description: newDescription, price: newPrice, status: newStatus, category: newCategory, urlForImage: newUrlForImage });
+                    if (el.primaryKeyAd === primaryKeyAd) {
+                        return Object.assign(Object.assign({}, el), { title: newTitle, description: newDescription, price: newPrice, status: newStatus, category: newCategory, urlImage: newUrlImage });
                     }
                     else
                         return el;
                 });
             }
-            else
-                console.log("annuncio non trovato");
+            return true;
         }
-        else
+        else {
             console.log("token non valido");
+            return false;
+        }
     }
-    deletetAds(token, primaryKeyAds) {
+    deleteAds(token, primaryKeyAd) {
         const auth = this.getAuthByToken(token);
         if (!!auth) {
             const primaryKeyAdsFind = this.ads.find((el) => {
-                if (el.primaryKeyAds === primaryKeyAds) {
+                if (el.primaryKeyAd === primaryKeyAd) {
                     return true;
                 }
                 else
@@ -199,21 +208,19 @@ class Marketplace {
             });
             if (!!primaryKeyAdsFind) {
                 this.ads = this.ads.filter((el) => {
-                    if (el.primaryKeyAds === primaryKeyAds) {
+                    if (el.primaryKeyAd === primaryKeyAd) {
                         return false;
                     }
                     else
                         return true;
                 });
-                console.log("eliminazione annuncio avvenuta con successo");
             }
-            else
-                console.log("non è stato possibile cancellare l'annuncio");
+            return true;
         }
         else
-            console.log("token non valido");
+            return false;
     }
-    createReview(token, referenceKeyUser, title, description, rating, referenceKeyAds) {
+    createReview(token, referenceKeyUser, title, description, rating, referenceKeyAd) {
         //creare recensione
         const auth = this.getAuthByToken(token);
         if (!!auth) {
@@ -225,92 +232,80 @@ class Marketplace {
                     return false;
             });
             const primaryKeyAdsFind = this.ads.find((el) => {
-                if (el.primaryKeyAds === referenceKeyAds) {
+                if (el.primaryKeyAd === referenceKeyAd) {
                     return true;
                 }
                 else
                     return false;
             });
             if (!!referenceKeyUserFind && !!primaryKeyAdsFind) {
-                const newReview = new review_1.Review(referenceKeyUser, title, description, rating, referenceKeyAds);
+                const newReview = new review_1.Review(referenceKeyUser, title, description, rating, referenceKeyAd);
                 this.reviews = [...this.reviews, newReview];
             }
-            else
-                console.log("non è stato possibile creare la recensione");
+            return true;
         }
         else
-            console.log("token non valido");
-    }
-    editReview(token, referenceKeyUser, title, description, rating, referenceKeyAds) {
+            return false;
+    } //deve essere cliccato due volte
+    editReview(token, primaryKeyReview, referenceKeyAd, newTitle, newDescription, newRating) {
         //modificare recensione
         const auth = this.getAuthByToken(token);
         if (!!auth) {
-            const referenceKeyUserFind = this.auth.find((el) => {
-                if (el.referenceKeyUser === referenceKeyUser) {
+            const primaryKeyReviewFind = this.reviews.find((el) => {
+                if (el.primaryKeyReview === primaryKeyReview) {
                     return true;
                 }
                 else
                     return false;
             });
-            const primaryKeyAdsFind = this.ads.find((el) => {
-                if (el.primaryKeyAds === referenceKeyAds) {
+            const referenceKeyAdFind = this.ads.find((el) => {
+                if (el.primaryKeyAd === referenceKeyAd) {
                     return true;
                 }
                 else
                     return false;
             });
-            if (!!referenceKeyUserFind && !!primaryKeyAdsFind) {
+            if (!!primaryKeyReviewFind && !!referenceKeyAdFind) {
                 this.reviews = this.reviews.map((el) => {
-                    if (el.referenceKeyUser === referenceKeyUser &&
-                        el.referenceKeyAds === referenceKeyAds) {
-                        return Object.assign(Object.assign({}, el), { title: title, description: description, rating: rating });
+                    if (el.primaryKeyReview === primaryKeyReview &&
+                        el.referenceKeyAds === referenceKeyAd) {
+                        return Object.assign(Object.assign({}, el), { title: newTitle, description: newDescription, rating: newRating });
                     }
-                    else {
+                    else
                         return el;
-                        console.log("non è stato possibile modificare la recensione");
-                    }
                 });
             }
+            return true;
         }
         else
-            console.log("token non valido");
+            return false;
     }
-    deleteReview(token, referenceKeyUser, referenceKeyAds) {
+    deleteReview(token, referenceKeyReview) {
         //eliminare recensione
         const auth = this.getAuthByToken(token);
         if (!!auth) {
-            const referenceKeyUserFind = this.auth.find((el) => {
-                if (el.referenceKeyUser === referenceKeyUser) {
+            const referenceKeyReviewFind = this.reviews.find((el) => {
+                if (el.primaryKeyReview === referenceKeyReview) {
                     return true;
                 }
                 else
                     return false;
             });
-            const primaryKeyAdsFind = this.ads.find((el) => {
-                if (el.primaryKeyAds === referenceKeyAds) {
-                    return true;
-                }
-                else
-                    return false;
-            });
-            if (!!primaryKeyAdsFind) {
+            if (!!referenceKeyReviewFind) {
                 this.reviews = this.reviews.filter((el) => {
-                    if (el.referenceKeyAds === referenceKeyAds &&
-                        el.referenceKeyUser === referenceKeyUser) {
+                    if (el.primaryKeyReview === referenceKeyReview) {
                         return false;
                     }
                     else
                         return true;
                 });
-                console.log("eliminazione review avvenuta con successo");
             }
-            else
-                console.log("ads sbagliato");
+            return true;
         }
         else
-            console.log("token non valido");
+            return false;
     }
-    createFavoutite(token, referenceKeyUser, referenceKeyAds) {
+    createFavoutite(token, referenceKeyUser, referenceKeyAd) {
         const userAuth = this.getAuthByToken(token);
         if (!!userAuth) {
             const referenceKeyUserFind = this.auth.find((el) => {
@@ -321,87 +316,94 @@ class Marketplace {
                     return false;
             });
             const primaryKeyAdsFind = this.ads.find((el) => {
-                if (el.primaryKeyAds === referenceKeyAds) {
+                if (el.primaryKeyAd === referenceKeyAd) {
                     return true;
                 }
                 else
                     return false;
             });
             if (!!primaryKeyAdsFind && !!referenceKeyUserFind) {
-                const newFavourite = new favourite_1.Favourite(referenceKeyUser, referenceKeyAds);
+                const newFavourite = new favourite_1.Favourite(referenceKeyUser, referenceKeyAd);
                 this.favourites = [...this.favourites, newFavourite];
-                console.log("annuncio aggiunto ai preferiti");
             }
-            else
-                console.log("annuncio non aggiunto");
+            return true;
         }
-        else {
-            console.log("token non valido");
-        }
+        else
+            return false;
     }
-    deleteFavourite(token, referenceKeyAds, referenceKeyUser) {
+    deleteFavourite(token, referenceKeyAd) {
         const auth = this.getAuthByToken(token);
         if (!!auth) {
-            const referenceKeyUserFind = this.auth.find((el) => {
-                if (el.referenceKeyUser === referenceKeyUser) {
-                    return true;
-                }
-                else
-                    return false;
-            });
             const primaryKeyAdsFind = this.ads.find((el) => {
-                if (el.primaryKeyAds === referenceKeyAds) {
+                if (el.primaryKeyAd === referenceKeyAd) {
                     return true;
                 }
                 else
                     return false;
             });
-            if (!!primaryKeyAdsFind && !!referenceKeyUserFind) {
+            if (!!primaryKeyAdsFind) {
                 this.favourites = this.favourites.filter((el) => {
-                    if (el.referenceKeyUser === referenceKeyUser &&
-                        el.referenceKeyAds === referenceKeyAds) {
+                    if (el.referenceKeyAds === referenceKeyAd) {
                         return false;
                     }
                     else
                         return true;
                 });
             }
+            return true;
         }
         else
-            console.log("token non valido");
+            return false;
     }
-    //   getListPurchasedToBeConfirmedByUserPurchased(token: Auth["token"]) {
-    //     const auth = this.getAuthByToken(token);
-    //     if (!!auth) {
-    //       const primaryKeyAdsFind = this.ads.find((el) => {
-    //         if (el.referenceKeyUserPurchased === null) {
-    //           return true;
-    //         } else return false;
-    //       });
-    //       if (!!primaryKeyAdsFind) {
-    //         return this.ads.filter((el) => {
-    //           if (el.referenceKeyUserPurchased === null) {
-    //             return true;
-    //             console.log("nessun annuncion corrisponde alla tua ricerca");
-    //           } else return false;
-    //         });
-    //       }
+    // createReports(referenceKeyAd: Ad["primaryKeyAd"], token: Auth["token"], title: string, description: string) {
+    //   // Permette a un user di creare un report e lo aggiunge nell'array reports
+    //   const auth = this.getAuthByToken(token);
+    //   const adFound = this.ads.find(function (ad) {
+    //     if (ad.primaryKeyAd === referenceKeyAd) return true;
+    //     else return false;
+    //   });
+    //   if (!!auth) {
+    //     if (!!adFound) {
+    //       const newReport = new ModelReport(String(auth.referenceKeyUser), referenceKeyAd, title, description);
+    //       this.reports = [...this.reports, newReport];
+    //       return true;
+    //     } else {
+    //       console.log("Annuncio non trovato");
+    //       return false;
     //     }
+    //   } else {
+    //     console.log("Autenticazione non effettuata");
+    //     return false;
     //   }
-    getAuthByToken(token) {
-        const authFind = this.auth.find((el) => {
-            if (el.token === token)
-                return true;
-            else
-                return false;
-        });
-        if (!!authFind) {
-            return authFind.referenceKeyUser;
-        }
-        else {
-            return null;
-        }
-    }
+    // }
+    // closeReports(referenceKeyReport: ModelReport["primaryKeyReport"], token: Auth["token"]) {
+    //   // Cerca nell'array reports l'id, se lo trova modifica la voce closed, altrimenti mostra un messaggio di errore
+    //   const auth: any = this.getAuthByToken(token);
+    //   let reportFound: any = null;
+    //   if (!!auth) {
+    //     reportFound = this.reports.find(function (report) {
+    //       if (report.primaryKeyReport === referenceKeyReport) return true;
+    //       else return false;
+    //     });
+    //     if (!!reportFound) {
+    //       this.reports = this.reports.map(function (report) {
+    //         if (reportFound.primaryKeyReport === report.primaryKeyReport)
+    //           return {
+    //             ...auth,
+    //             closed: true,
+    //           };
+    //         else return auth;
+    //       });
+    //       return true;
+    //     } else {
+    //       console.log("Report non trovato");
+    //       return false;
+    //     }
+    //   } else {
+    //     console.log("Autenticazione non effettuata");
+    //     return false;
+    //   }
+    // }
     listFiltredByCategory(token, category) {
         //lista filtrata
         const auth = this.getAuthByToken(token);
@@ -422,17 +424,16 @@ class Marketplace {
                         return false;
                 });
             }
-            else
-                console.log("nessun annuncio per questa categoria");
+            return true;
         }
         else
-            console.log("token non valido");
+            return false;
     }
-    markAsSold(token, referenceKeyAds, referenceKeyUser) {
+    markAsSold(token, referenceKeyAd, referenceKeyUserPurchased) {
         const auth = this.getAuthByToken(token);
         if (!!auth) {
             const primaryKeyAdsFind = this.ads.find((el) => {
-                if (el.primaryKeyAds === referenceKeyAds) {
+                if (el.primaryKeyAd === referenceKeyAd) {
                     return true;
                 }
                 else
@@ -440,8 +441,8 @@ class Marketplace {
             });
             if (!!primaryKeyAdsFind) {
                 this.ads = this.ads.map((el) => {
-                    if (el.primaryKeyAds === referenceKeyAds) {
-                        return Object.assign(Object.assign({}, el), { referenceKeyUserPurchased: referenceKeyUser });
+                    if (el.primaryKeyAd === referenceKeyAd) {
+                        return Object.assign(Object.assign({}, el), { referenceKeyUserPurchased: referenceKeyUserPurchased });
                     }
                     else {
                         return el;
@@ -449,9 +450,25 @@ class Marketplace {
                     }
                 });
             }
+            return true;
         }
         else
-            console.log("token non valido");
+            return false;
+    }
+    listUsers() {
+        return this.users;
+    }
+    listAds() {
+        return this.ads;
+    }
+    listFavourites() {
+        return this.favourites;
+    }
+    listReviews() {
+        return this.reviews;
+    }
+    listAuth() {
+        return this.auth;
     }
 }
 exports.Marketplace = Marketplace;

@@ -26,15 +26,167 @@ Authorization: 0.2548523080968996
 
 ### USER DELETE
 
-POST  http://localhost:3000/api/user/delete
+DELETE   http://localhost:3000/api/user/delete
 Content-Type: application/json
-Authorization:  0.9665657645650463
+Authorization: 0.4023286529949459
 
 
 {
   "password": "admin"
 }
 
+### USER UPDATE NAME
+PATCH http://localhost:3000/api/users/update-username/0.07404815937472065
+Content-Type: application/json
+Authorization: 0.4023286529949459
+
+{
+ "newUsername" : "alucard"
+}
+
+### USER CREATE AD
+
+POST http://localhost:3000/api/ads
+Content-Type: application/json
+Authorization: 0.5307314168196715
 
 
+
+{
+  "title": "test",
+  "description": "test",
+    "price" : 10,
+    "status" : "broken",
+    "referenceKeyUser" : "0.4880370988840419",
+    "category" : "cazzo",
+    "address" : "calabria",
+    "urlImage" : "test",
+    "referenceKeyUserPurchased": null
+}
+
+### EDIT AD
+
+PUT  http://localhost:3000/api/ads/update/0.9821823408376693
+Content-Type: application/json
+Authorization: 0.33448685277597456
+
+{
+    "newTitle": "new iphone",
+    "newDescription" : "new iphone",
+    "newPrice" : 20,
+    "newStatus" : "good", 
+    "newCategory" : "test",
+    "newUrlImage" : "test"
+}
+
+### DELETE AD
+
+DELETE  http://localhost:3000/api/ads/delete/0.9821823408376693
+Content-Type: application/json
+Authorization: 0.33448685277597456
+
+### LIST CATEGORY
+
+GET http://localhost:3000/api/lists/categories
+Content-Type: application/json
+Authorization: 0.5307314168196715
+
+{
+  "category": "dio"
+}
+
+### AD MARK AS SOLD
+
+PATCH   http://localhost:3000/api/ads/update-ad-sold/0.6539672099662828
+Content-Type: application/json
+Authorization: 0.26246886004656056
+
+{
+  "referenceKeyUserPurchased": "0.3379569540919314"
+}
+
+
+### ADD REVIEW
+POST http://localhost:3000/api/reviews
+Content-Type: application/json
+Authorization:  0.8892814684186565
+
+
+
+{
+  "referenceKeyUser": "0.6272831786103243",
+  "title": "test",
+  "description": "test",
+  "rating": 10,
+  "referenceKeyAd": 0.7221064249323783
+}
+
+
+
+
+### EDIT REVIEW
+
+PUT  http://localhost:3000/api/reviews/update/0.17358070196474729
+Content-Type: application/json
+Authorization: 0.8892814684186565
+
+
+
+{
+    "newTitle": "dio",
+    "newDescription": "sano",
+    "newRating": 20,
+    "referenceKeyAd": 0.7221064249323783
+}
+
+
+
+### DELETE REVIEW
+DELETE  http://localhost:3000/api/reviews/delete/0.17358070196474729
+Content-Type: application/json
+Authorization: 0.8892814684186565
+
+
+### ADD FAVOURITE
+
+POST  http://localhost:3000/api/favourites
+Content-Type: application/json
+Authorization: 0.8892814684186565
+
+{
+  "refecenceKeyUser": "0.6272831786103243",
+  "referenceKeyAd":  0.7221064249323783
+}
+
+### REMOVE FAVOURITE
+
+PATCH   http://localhost:3000/api/favourites/remove/0.7221064249323783
+Content-Type: application/json
+Authorization: 0.8892814684186565
+
+
+### LIST USERS
+
+GET http://localhost:3000/api/lists/users
+Content-Type: application/json
+
+### LIST ADS
+
+GET http://localhost:3000/api/lists/ads
+Content-Type: application/json
+
+### LIST REVIEWS
+
+GET http://localhost:3000/api/lists/reviews
+Content-Type: application/json
+
+### LIST FAVOURITES
+
+GET http://localhost:3000/api/lists/favourites
+Content-Type: application/json
+
+### LIST AUTH
+
+GET http://localhost:3000/api/lists/auth
+Content-Type: application/json
 

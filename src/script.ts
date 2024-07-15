@@ -16,7 +16,19 @@ export class Marketplace {
   reports: ReadonlyArray<ModelReport> = [];
   favourites: ReadonlyArray<Favourite> = [];
 
-  register(email: string, password: string) {
+  getAuthByToken(token: Auth["token"]) {
+    const authFind = this.auth.find((el) => {
+      if (el.token === token) return true;
+      else return false;
+    });
+
+    if (!!authFind) {
+      return authFind.referenceKeyUser;
+    } else {
+      return null;
+    }
+  }
+  register(email: User["email"], password: User["password"]) {
     const userFind = this.users.find((user: User) => {
       if (user.email === email) {
         return true;
@@ -74,7 +86,7 @@ export class Marketplace {
     }
   }
 
-  deleteAccount(token: Auth["token"], password: string) {
+  deleteAccount(token: Auth["token"], password: User["password"]) {
     const auth = this.getAuthByToken(token);
 
     if (!!auth) {
@@ -123,10 +135,11 @@ export class Marketplace {
           }
         });
       }
-    } else console.log("token errato");
+      return true;
+    } else return false;
   }
 
-  createAds(
+  createAd(
     token: Auth["token"],
     referenceKeyUser: Auth["referenceKeyUser"],
     title: Ad["title"],
@@ -147,7 +160,7 @@ export class Marketplace {
         } else return false;
       });
       if (!!userFind) {
-        const newAds = new Ad(
+        const newAd = new Ad(
           title,
           description,
           price,
@@ -159,13 +172,14 @@ export class Marketplace {
           referenceKeyUserPurchased,
           urlImage
         );
-        this.ads = [...this.ads, newAds];
-        console.log("annuncio creato con successo");
+        this.ads = [...this.ads, newAd];
       } else {
         console.log("non è stato possibile creare l'annuncio");
       }
+      return true;
     } else {
-      console.log("token non esiste");
+      return false;
+      console.log("token errato");
     }
   }
 
@@ -175,33 +189,23 @@ export class Marketplace {
     newDescription: Ad["description"],
     newPrice: Ad["price"],
     newStatus: Ad["status"],
-    referenceKeyUser: Auth["referenceKeyUser"],
-    primaryKeyAds: Ad["primaryKeyAds"],
+    primaryKeyAd: Ad["primaryKeyAd"],
     newCategory: Ad["category"],
-    newUrlForImage: Ad["urlImage"]
+    newUrlImage: Ad["urlImage"]
   ) {
     // modificare annuncio
 
     const auth = this.getAuthByToken(token);
 
     if (!!auth) {
-      const referenceKeyUserFind = this.auth.find((el) => {
-        if (el.referenceKeyUser === referenceKeyUser) {
-          return true;
-        } else return false;
-      });
-
       const primaryKeyAdsFind = this.ads.find((el) => {
-        if (el.primaryKeyAds === primaryKeyAds) {
+        if (el.primaryKeyAd === primaryKeyAd) {
           return true;
         } else return false;
       });
-      if (!!primaryKeyAdsFind && !!referenceKeyUserFind) {
+      if (!!primaryKeyAdsFind) {
         this.ads = this.ads.map((el) => {
-          if (
-            el.primaryKeyAds === primaryKeyAds &&
-            el.referenceKeyUser === referenceKeyUser
-          ) {
+          if (el.primaryKeyAd === primaryKeyAd) {
             return {
               ...el,
               title: newTitle,
@@ -209,32 +213,36 @@ export class Marketplace {
               price: newPrice,
               status: newStatus,
               category: newCategory,
-              urlForImage: newUrlForImage,
+              urlImage: newUrlImage,
             };
           } else return el;
         });
-      } else console.log("annuncio non trovato");
-    } else console.log("token non valido");
+      }
+      return true;
+    } else {
+      console.log("token non valido");
+      return false;
+    }
   }
 
-  deletetAds(token: Auth["token"], primaryKeyAds: Ad["primaryKeyAds"]) {
+  deleteAds(token: Auth["token"], primaryKeyAd: Ad["primaryKeyAd"]) {
     const auth = this.getAuthByToken(token);
 
     if (!!auth) {
       const primaryKeyAdsFind = this.ads.find((el) => {
-        if (el.primaryKeyAds === primaryKeyAds) {
+        if (el.primaryKeyAd === primaryKeyAd) {
           return true;
         } else return false;
       });
       if (!!primaryKeyAdsFind) {
         this.ads = this.ads.filter((el) => {
-          if (el.primaryKeyAds === primaryKeyAds) {
+          if (el.primaryKeyAd === primaryKeyAd) {
             return false;
           } else return true;
         });
-        console.log("eliminazione annuncio avvenuta con successo");
-      } else console.log("non è stato possibile cancellare l'annuncio");
-    } else console.log("token non valido");
+      }
+      return true;
+    } else return false;
   }
 
   createReview(
@@ -243,7 +251,7 @@ export class Marketplace {
     title: Review["title"],
     description: Review["description"],
     rating: Review["rating"],
-    referenceKeyAds: Ad["primaryKeyAds"]
+    referenceKeyAd: Ad["primaryKeyAd"]
   ) {
     //creare recensione
     const auth = this.getAuthByToken(token);
@@ -254,7 +262,7 @@ export class Marketplace {
         } else return false;
       });
       const primaryKeyAdsFind = this.ads.find((el) => {
-        if (el.primaryKeyAds === referenceKeyAds) {
+        if (el.primaryKeyAd === referenceKeyAd) {
           return true;
         } else return false;
       });
@@ -264,93 +272,85 @@ export class Marketplace {
           title,
           description,
           rating,
-          referenceKeyAds
+          referenceKeyAd
         );
         this.reviews = [...this.reviews, newReview];
-      } else console.log("non è stato possibile creare la recensione");
-    } else console.log("token non valido");
-  }
+      }
+      return true;
+    } else return false;
+  } //deve essere cliccato due volte
 
   editReview(
     token: Auth["token"],
-    referenceKeyUser: Auth["referenceKeyUser"],
-    title: Review["title"],
-    description: Review["description"],
-    rating: Review["rating"],
-    referenceKeyAds: Ad["primaryKeyAds"]
+    primaryKeyReview: Review["primaryKeyReview"],
+    referenceKeyAd: Ad["primaryKeyAd"],
+    newTitle: Review["title"],
+    newDescription: Review["description"],
+    newRating: Review["rating"]
   ) {
     //modificare recensione
     const auth = this.getAuthByToken(token);
     if (!!auth) {
-      const referenceKeyUserFind = this.auth.find((el) => {
-        if (el.referenceKeyUser === referenceKeyUser) {
-          return true;
-        } else return false;
-      });
-      const primaryKeyAdsFind = this.ads.find((el) => {
-        if (el.primaryKeyAds === referenceKeyAds) {
+      const primaryKeyReviewFind = this.reviews.find((el) => {
+        if (el.primaryKeyReview === primaryKeyReview) {
           return true;
         } else return false;
       });
 
-      if (!!referenceKeyUserFind && !!primaryKeyAdsFind) {
+      const referenceKeyAdFind = this.ads.find((el) => {
+        if (el.primaryKeyAd === referenceKeyAd) {
+          return true;
+        } else return false;
+      });
+
+      if (!!primaryKeyReviewFind && !!referenceKeyAdFind) {
         this.reviews = this.reviews.map((el) => {
           if (
-            el.referenceKeyUser === referenceKeyUser &&
-            el.referenceKeyAds === referenceKeyAds
+            el.primaryKeyReview === primaryKeyReview &&
+            el.referenceKeyAds === referenceKeyAd
           ) {
             return {
               ...el,
-              title: title,
-              description: description,
-              rating: rating,
+              title: newTitle,
+              description: newDescription,
+              rating: newRating,
             };
-          } else {
-            return el;
-            console.log("non è stato possibile modificare la recensione");
-          }
+          } else return el;
         });
       }
-    } else console.log("token non valido");
+      return true;
+    } else return false;
   }
 
   deleteReview(
     token: Auth["token"],
-    referenceKeyUser: Auth["referenceKeyUser"],
-    referenceKeyAds: Ad["primaryKeyAds"]
+    referenceKeyReview: Review["primaryKeyReview"]
   ) {
     //eliminare recensione
     const auth = this.getAuthByToken(token);
 
     if (!!auth) {
-      const referenceKeyUserFind = this.auth.find((el) => {
-        if (el.referenceKeyUser === referenceKeyUser) {
+      const referenceKeyReviewFind = this.reviews.find((el) => {
+        if (el.primaryKeyReview === referenceKeyReview) {
           return true;
         } else return false;
       });
-      const primaryKeyAdsFind = this.ads.find((el) => {
-        if (el.primaryKeyAds === referenceKeyAds) {
-          return true;
-        } else return false;
-      });
-      if (!!primaryKeyAdsFind) {
+
+      if (!!referenceKeyReviewFind) {
         this.reviews = this.reviews.filter((el) => {
-          if (
-            el.referenceKeyAds === referenceKeyAds &&
-            el.referenceKeyUser === referenceKeyUser
-          ) {
+          if (el.primaryKeyReview === referenceKeyReview) {
             return false;
           } else return true;
         });
-        console.log("eliminazione review avvenuta con successo");
-      } else console.log("ads sbagliato");
-    } else console.log("token non valido");
+      }
+      return true;
+    } else return false;
   }
 
   createFavoutite(
     token: Auth["token"],
     referenceKeyUser: Auth["referenceKeyUser"],
-    referenceKeyAds: Ad["primaryKeyAds"]
+    referenceKeyAd: Ad["primaryKeyAd"]
   ) {
     const userAuth = this.getAuthByToken(token);
     if (!!userAuth) {
@@ -361,81 +361,91 @@ export class Marketplace {
       });
 
       const primaryKeyAdsFind = this.ads.find((el) => {
-        if (el.primaryKeyAds === referenceKeyAds) {
+        if (el.primaryKeyAd === referenceKeyAd) {
           return true;
         } else return false;
       });
       if (!!primaryKeyAdsFind && !!referenceKeyUserFind) {
-        const newFavourite = new Favourite(referenceKeyUser, referenceKeyAds);
+        const newFavourite = new Favourite(referenceKeyUser, referenceKeyAd);
         this.favourites = [...this.favourites, newFavourite];
-        console.log("annuncio aggiunto ai preferiti");
-      } else console.log("annuncio non aggiunto");
-    } else {
-      console.log("token non valido");
-    }
+      }
+      return true;
+    } else return false;
   }
 
-  deleteFavourite(
-    token: Auth["token"],
-    referenceKeyAds: Ad["primaryKeyAds"],
-    referenceKeyUser: Auth["referenceKeyUser"]
-  ) {
+  deleteFavourite(token: Auth["token"], referenceKeyAd: Ad["primaryKeyAd"]) {
     const auth = this.getAuthByToken(token);
     if (!!auth) {
-      const referenceKeyUserFind = this.auth.find((el) => {
-        if (el.referenceKeyUser === referenceKeyUser) {
-          return true;
-        } else return false;
-      });
       const primaryKeyAdsFind = this.ads.find((el) => {
-        if (el.primaryKeyAds === referenceKeyAds) {
+        if (el.primaryKeyAd === referenceKeyAd) {
           return true;
         } else return false;
       });
 
-      if (!!primaryKeyAdsFind && !!referenceKeyUserFind) {
+      if (!!primaryKeyAdsFind) {
         this.favourites = this.favourites.filter((el) => {
-          if (
-            el.referenceKeyUser === referenceKeyUser &&
-            el.referenceKeyAds === referenceKeyAds
-          ) {
+          if (el.referenceKeyAds === referenceKeyAd) {
             return false;
           } else return true;
         });
       }
-    } else console.log("token non valido");
+      return true;
+    } else return false;
   }
 
-  //   getListPurchasedToBeConfirmedByUserPurchased(token: Auth["token"]) {
-  //     const auth = this.getAuthByToken(token);
-  //     if (!!auth) {
-  //       const primaryKeyAdsFind = this.ads.find((el) => {
-  //         if (el.referenceKeyUserPurchased === null) {
-  //           return true;
-  //         } else return false;
-  //       });
-  //       if (!!primaryKeyAdsFind) {
-  //         return this.ads.filter((el) => {
-  //           if (el.referenceKeyUserPurchased === null) {
-  //             return true;
-  //             console.log("nessun annuncion corrisponde alla tua ricerca");
-  //           } else return false;
-  //         });
-  //       }
+  // createReports(referenceKeyAd: Ad["primaryKeyAd"], token: Auth["token"], title: string, description: string) {
+  //   // Permette a un user di creare un report e lo aggiunge nell'array reports
+  //   const auth = this.getAuthByToken(token);
+  //   const adFound = this.ads.find(function (ad) {
+  //     if (ad.primaryKeyAd === referenceKeyAd) return true;
+  //     else return false;
+  //   });
+
+  //   if (!!auth) {
+  //     if (!!adFound) {
+  //       const newReport = new ModelReport(String(auth.referenceKeyUser), referenceKeyAd, title, description);
+  //       this.reports = [...this.reports, newReport];
+  //       return true;
+  //     } else {
+  //       console.log("Annuncio non trovato");
+  //       return false;
   //     }
+  //   } else {
+  //     console.log("Autenticazione non effettuata");
+  //     return false;
   //   }
-  getAuthByToken(token: Auth["token"]) {
-    const authFind = this.auth.find((el) => {
-      if (el.token === token) return true;
-      else return false;
-    });
+  // }
 
-    if (!!authFind) {
-      return authFind.referenceKeyUser;
-    } else {
-      return null;
-    }
-  }
+  // closeReports(referenceKeyReport: ModelReport["primaryKeyReport"], token: Auth["token"]) {
+  //   // Cerca nell'array reports l'id, se lo trova modifica la voce closed, altrimenti mostra un messaggio di errore
+  //   const auth: any = this.getAuthByToken(token);
+  //   let reportFound: any = null;
+  //   if (!!auth) {
+  //     reportFound = this.reports.find(function (report) {
+  //       if (report.primaryKeyReport === referenceKeyReport) return true;
+  //       else return false;
+  //     });
+
+  //     if (!!reportFound) {
+  //       this.reports = this.reports.map(function (report) {
+  //         if (reportFound.primaryKeyReport === report.primaryKeyReport)
+  //           return {
+  //             ...auth,
+  //             closed: true,
+  //           };
+  //         else return auth;
+  //       });
+  //       return true;
+  //     } else {
+  //       console.log("Report non trovato");
+  //       return false;
+  //     }
+  //   } else {
+  //     console.log("Autenticazione non effettuata");
+  //     return false;
+  //   }
+  // }
+
   listFiltredByCategory(token: Auth["token"], category: Ad["category"]) {
     //lista filtrata
     const auth = this.getAuthByToken(token);
@@ -452,28 +462,29 @@ export class Marketplace {
             return true;
           } else return false;
         });
-      } else console.log("nessun annuncio per questa categoria");
-    } else console.log("token non valido");
+      }
+      return true;
+    } else return false;
   }
   markAsSold(
     token: Auth["token"],
-    referenceKeyAds: Ad["primaryKeyAds"],
-    referenceKeyUser: Auth["referenceKeyUser"]
+    referenceKeyAd: Ad["primaryKeyAd"],
+    referenceKeyUserPurchased: Auth["referenceKeyUser"]
   ) {
     const auth = this.getAuthByToken(token);
     if (!!auth) {
       const primaryKeyAdsFind = this.ads.find((el) => {
-        if (el.primaryKeyAds === referenceKeyAds) {
+        if (el.primaryKeyAd === referenceKeyAd) {
           return true;
         } else return false;
       });
 
       if (!!primaryKeyAdsFind) {
         this.ads = this.ads.map((el) => {
-          if (el.primaryKeyAds === referenceKeyAds) {
+          if (el.primaryKeyAd === referenceKeyAd) {
             return {
               ...el,
-              referenceKeyUserPurchased: referenceKeyUser,
+              referenceKeyUserPurchased: referenceKeyUserPurchased,
             };
           } else {
             return el;
@@ -481,7 +492,26 @@ export class Marketplace {
           }
         });
       }
-    } else console.log("token non valido");
+      return true;
+    } else return false;
+  }
+
+  listUsers() {
+    return this.users;
+  }
+
+  listAds() {
+    return this.ads;
+  }
+
+  listFavourites() {
+    return this.favourites;
+  }
+  listReviews() {
+    return this.reviews;
+  }
+  listAuth() {
+    return this.auth;
   }
 }
 

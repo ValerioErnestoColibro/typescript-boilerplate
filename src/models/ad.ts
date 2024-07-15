@@ -11,7 +11,7 @@ export class Ad {
   address: string;
   referenceKeyUserPurchased: string;
   date: Date;
-  primaryKeyAds: number;
+  primaryKeyAd: number;
   urlImage: string;
   constructor(
     title: string,
@@ -35,7 +35,7 @@ export class Ad {
     this.address = address;
     this.referenceKeyUserPurchased = referenceKeyUserPurchased;
     this.date = new Date();
-    this.primaryKeyAds = Math.random();
+    this.primaryKeyAd = Math.random();
     this.urlImage = urlImage;
   }
 }

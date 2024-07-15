@@ -6,14 +6,14 @@ export class Review {
   description: string;
   rating: number;
   title: string;
-  referenceKeyAds: Ad["primaryKeyAds"];
+  referenceKeyAds: Ad["primaryKeyAd"];
   primaryKeyReview: number;
   constructor(
     referenceKeyUser: Auth["referenceKeyUser"],
     title: string,
     description: string,
     rating: number,
-    referenceKeyAds: Ad["primaryKeyAds"]
+    referenceKeyAds: Ad["primaryKeyAd"]
   ) {
     this.referenceKeyUser = referenceKeyUser;
     this.time = new Date();
